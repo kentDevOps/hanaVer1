@@ -1,0 +1,13 @@
+
+[20240918 11:05:58] countFileInFolder() missing 1 required positional argument: 'folder_name'
+[20240918 11:06:21] countFileInFolder() missing 1 required positional argument: 'folder_name'
+[20240918 11:07:58] countFileInFolder() missing 1 required positional argument: 'folder_name'
+[20240918 11:08:39] countFileInFolder() missing 1 required positional argument: 'folder_name'
+[20240918 11:09:30] [WinError 3] The system cannot find the path specified: 'D:\\02_Study\\08_Python\\16_Hana_Report\\HanaV1\\main.py\\BOM'
+[20240918 11:10:16] [WinError 3] The system cannot find the path specified: 'd:\\02_Study\\08_Python\\16_Hana_Report\\HanaV1\\main.py\\BOM'
+[20240918 11:11:03] [WinError 3] The system cannot find the path specified: 'D:\\02_Study\\08_Python\\16_Hana_Report\\HanaV1\\main.py\\BOM'
+[20240918 14:09:18] BOMprocess() takes 0 positional arguments but 2 were given
+[20240918 14:34:18] 'charmap' codec can't encode character '\u1ea3' in position 13: character maps to <undefined>
+[20240918 15:46:27] "None of [Index(['Mã NPL/SP', 'Tên hàng'], dtype='object')] are in the [columns]"
+[20240918 15:54:28] 'Mã NPL'
+[20240918 16:57:34] ufunc 'add' did not contain a loop with signature matching types (dtype('<U15'), dtype('float64')) -> None
