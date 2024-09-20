@@ -1,0 +1,10 @@
+
+[20240920 15:40:56] positional indexers are out-of-bounds
+[20240920 15:55:42] positional indexers are out-of-bounds
+[20240920 16:07:21] positional indexers are out-of-bounds
+[20240920 16:10:08] positional indexers are out-of-bounds
+[20240920 16:17:20] positional indexers are out-of-bounds
+[20240920 16:18:23] single positional indexer is out-of-bounds
+[20240920 16:21:25] cannot access local variable 'df_tc' where it is not associated with a value
+[20240920 16:24:02] 'Hoá 
+[20240920 17:04:12] columns overlap but no suffix specified: Index(['tenHang'], dtype='object')

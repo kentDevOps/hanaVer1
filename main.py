@@ -4,6 +4,7 @@ import time
 def mainPro():
     try:
         start_time = time.time()
+
     # Kiểm Tra đã có các File Cần chưa
         count_Bom = countFileInFolder('BOM')
         count_Tc = countFileInFolder('tc')
