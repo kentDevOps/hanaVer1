@@ -47,33 +47,39 @@ def BOMprocess():
     print(df_dongThue_tenHang)
     df_BOM = pd.concat([df_dongThue_tenHang, df_mienThue_tenHang], axis=0)
     print(df_BOM)
-    colNpl =result.iloc[:,1]
-    colSoLuong =result.iloc[:,2]
-    colTenHang =result.iloc[:,3]
+    colNpl =df_BOM.iloc[:,1]
+    colSoLuong =df_BOM.iloc[:,2]
+    colTenHang =df_BOM.iloc[:,3]
+    colHs =df_BOM.iloc[:,4]
+    colDv =df_BOM.iloc[:,5]
     dfReport = pd.read_excel('temp.xlsx',sheet_name='rp')
     lastRowRp = len(dfReport) + 1
     dfReport.iloc[:,:] = np.nan    
-    print(result)
+    print('Bắt Đầu Ghi Mã NPL, Tên Hàng , Định Mức Sản Phẩm...')
     with pd.ExcelWriter('temp.xlsx' , engine='openpyxl', mode='a',if_sheet_exists='overlay') as writer:
         dfReport.to_excel(writer, sheet_name='rp', index=False, startcol= 0,startrow=22, header=False) 
         colNpl.to_excel(writer, sheet_name='rp', index=False, startcol= 1,startrow=22, header=False)  
-        colSoLuong.to_excel(writer, sheet_name='rp', index=False, startcol= 5,startrow=22, header=False)    
+        colTenHang.to_excel(writer, sheet_name='rp', index=False, startcol= 2,startrow=22, header=False)    
+        colSoLuong.to_excel(writer, sheet_name='rp', index=False, startcol= 5,startrow=22, header=False) 
+        colHs.to_excel(writer, sheet_name='rp', index=False, startcol= 3,startrow=22, header=False) 
+        colDv.to_excel(writer, sheet_name='rp', index=False, startcol= 4,startrow=22, header=False) 
+    print('Quá Trình Ghi Mã NPL, Tên Hàng , Định Mức Sản Phẩm Kết Thúc!!!')   
 def mienThueProcess():
     file_path = getRelativeFile('mienThue','\*mienThue*.xlsx')
     df = pd.read_excel(file_path[0]) 
     #df_loc = df[['Mã NPL/SP','Tên hàng']]
-    df_loc = df.iloc[2:,[39,41]]
-    df_loc.columns = ['Mã NPL','tenHang']
+    df_loc = df.iloc[2:,[39,41,40,46]]
+    df_loc.columns = ['Mã NPL','tenHang','hs','dv']
     return df_loc
 def dongThue_Tc_Process():
     file_path_dongThue = getRelativeFile('dongThue','\*dongThue*.xlsx')
     file_path_Tc = getRelativeFile('tc','\*TC*.xlsx')
-    df_dongThue = pd.read_excel(file_path_dongThue[0]).iloc[2:,[3,45]]
-    df_dongThue.columns = ['Mã NPL','tenHang']
+    df_dongThue = pd.read_excel(file_path_dongThue[0]).iloc[2:,[3,45,44,50]]
+    df_dongThue.columns = ['Mã NPL','tenHang','hs','dv']
     print("dongThue File :")
     print(df_dongThue)
-    df_tc = pd.read_excel(file_path_Tc[0],sheet_name='TC').iloc[:,[8,10]]
-    df_tc.columns = ['Mã NPL','tenHang']
+    df_tc = pd.read_excel(file_path_Tc[0],sheet_name='TC').iloc[:,[8,10,9,11]]
+    df_tc.columns = ['Mã NPL','tenHang','hs','dv']
     print("Tc File :")
     print(df_tc)    
     df_merged = pd.concat([df_dongThue, df_tc], axis=0)
