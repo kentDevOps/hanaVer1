@@ -4,9 +4,9 @@ import time
 def mainPro():
     try:
         start_time = time.time()
-
+        tcTest()
     # Kiểm Tra đã có các File Cần chưa
-        count_Bom = countFileInFolder('BOM')
+        '''count_Bom = countFileInFolder('BOM')
         count_Tc = countFileInFolder('tc')
         count_mienThue = countFileInFolder('mienThue')
         count_dongThue = countFileInFolder('dongThue')
@@ -25,7 +25,7 @@ def mainPro():
     # xử lí file BOM , LẤY DỮ LIỆU
         BOMprocess()
         end_time = time.time()
-        print(f'Thời gian thực thi: {end_time - start_time} giây')
+        print(f'Thời gian thực thi: {end_time - start_time} giây')'''
     except Exception as ex:
         logExp(str(ex))   
 

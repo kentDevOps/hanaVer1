@@ -87,10 +87,12 @@ def dongThue_Tc_Process():
     print(df_merged)    
     return df_merged
 def tcTest():
-    file_path_Tc = getRelativeFile('tc','\*TC*.xlsx')
-    df_tc = pd.read_excel(file_path_Tc[0],sheet_name="TC")
-    
+    file_path_Tc = getRelativeFile('BOM','\*BOM*.xlsx')
+    df_tc = pd.read_excel(file_path_Tc[0])
+    unique_values = df_tc['Mã sản phẩm'].unique()
     #df_tc = pd.read_excel(file_path_Tc[0])#.iloc[2:,[8,10]]
    # df_tc = df_tc.iloc[:,3]
-    print(df_tc.shape) 
+    print(df_tc) 
+    print(unique_values) 
+    print(str(len(unique_values)))
     return df_tc
