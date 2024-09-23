@@ -1,0 +1,6 @@
+
+[20240923 13:22:56] 'MergedCell' object attribute 'value' is read-only
+[20240923 13:46:36] 'MergedCell' object attribute 'value' is read-only
+[20240923 16:26:56] Excel file format cannot be determined, you must specify an engine manually.
+[20240923 16:28:48] Excel file format cannot be determined, you must specify an engine manually.
+[20240923 17:02:46] 'slsp'

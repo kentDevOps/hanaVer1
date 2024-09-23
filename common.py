@@ -3,6 +3,7 @@ from log import *
 import pandas as pd
 import numpy as np
 from openpyxl import load_workbook
+import openpyxl
 
 def getRelativeFile(folder_name,file_name):
     strAbsPath = os.path.abspath(sys.argv[0])
@@ -13,7 +14,11 @@ def getRelativeFile(folder_name,file_name):
 def BOMprocess():
     file_path = getRelativeFile('BOM','\*BOM*.xlsx')
     df = pd.read_excel(file_path[0])
+    print('In Ra BOM nguyên bản...')
+    print(df)
     result = df.groupby(['Mã sản phẩm', 'Mã NPL'], as_index=False).agg({'Lượng NL, VT thực tế sử dụng để sản xuất một sản phẩm ': 'sum'})
+    print('In Ra BOM Sau Khi Gộp Theo Mã SP, Mã NL , Gộp Lượng Định Mức...')
+    print(result)   
     # Lọc mã NPL Có  KD (Đóng Thuế hoặc là TC)
     df_Kd = result[result['Mã NPL'].str.contains('KD', na=False)]
     print(df_Kd)
@@ -47,7 +52,7 @@ def BOMprocess():
     print(df_dongThue_tenHang)
     df_BOM = pd.concat([df_dongThue_tenHang, df_mienThue_tenHang], axis=0)
     print(df_BOM)
-    colNpl =df_BOM.iloc[:,1]
+    '''colNpl =df_BOM.iloc[:,1]
     colSoLuong =df_BOM.iloc[:,2]
     colTenHang =df_BOM.iloc[:,3]
     colHs =df_BOM.iloc[:,4]
@@ -62,8 +67,13 @@ def BOMprocess():
         colTenHang.to_excel(writer, sheet_name='rp', index=False, startcol= 2,startrow=22, header=False)    
         colSoLuong.to_excel(writer, sheet_name='rp', index=False, startcol= 5,startrow=22, header=False) 
         colHs.to_excel(writer, sheet_name='rp', index=False, startcol= 3,startrow=22, header=False) 
-        colDv.to_excel(writer, sheet_name='rp', index=False, startcol= 4,startrow=22, header=False) 
-    print('Quá Trình Ghi Mã NPL, Tên Hàng , Định Mức Sản Phẩm Kết Thúc!!!')   
+        colDv.to_excel(writer, sheet_name='rp', index=False, startcol= 4,startrow=22, header=False)
+    print('Quá Trình Ghi Mã NPL, Tên Hàng , Định Mức Sản Phẩm Kết Thúc!!!') '''  
+    return df_BOM
+def exportToReport(maSp):
+    df = pd.DataFrame({'maSP': [maSp]})
+    with pd.ExcelWriter('temp.xlsx' , engine='openpyxl', mode='a',if_sheet_exists='overlay') as writer:
+        df['maSP'].to_excel(writer, sheet_name='rp', index=False, startcol= 11,startrow=3, header=False) 
 def mienThueProcess():
     file_path = getRelativeFile('mienThue','\*mienThue*.xlsx')
     df = pd.read_excel(file_path[0]) 
@@ -89,10 +99,41 @@ def dongThue_Tc_Process():
 def tcTest():
     file_path_Tc = getRelativeFile('BOM','\*BOM*.xlsx')
     df_tc = pd.read_excel(file_path_Tc[0])
-    unique_values = df_tc['Mã sản phẩm'].unique()
+    #unique_values = df_tc['Mã sản phẩm'].unique()
     #df_tc = pd.read_excel(file_path_Tc[0])#.iloc[2:,[8,10]]
    # df_tc = df_tc.iloc[:,3]
-    print(df_tc) 
-    print(unique_values) 
-    print(str(len(unique_values)))
+    df_filtered = df_tc.drop_duplicates(subset=['Mã sản phẩm', 'Số lượng sản phẩm'], keep='first')
+    print(df_filtered) 
+    #print(unique_values) 
+    #print(str(len(unique_values)))
     return df_tc
+def exportSlsp(maSP):
+    file_path_Tc = getRelativeFile('BOM','\*BOM*.xlsx')
+    df_tc = pd.read_excel(file_path_Tc[0]) 
+    df_filtered = df_tc.drop_duplicates(subset=['Mã sản phẩm', 'Số lượng sản phẩm'], keep='first')  
+    filtered_df = df_filtered[df_filtered['Mã sản phẩm'] == maSP]
+    print(filtered_df)
+    so_luong_san_pham = filtered_df[['Số lượng sản phẩm']]
+    print('slsp : ')
+    print(so_luong_san_pham)
+    so_luong_san_pham.columns = ['slsp']
+    with pd.ExcelWriter('temp.xlsx' , engine='openpyxl', mode='a',if_sheet_exists='overlay') as writer:
+        so_luong_san_pham['slsp'].to_excel(writer, sheet_name='rp', index=False, startcol= 12,startrow=6, header=False)
+    return so_luong_san_pham.iloc[0,0] 
+def exportBasicInfor(maSP,df_BOM):
+    colNpl =df_BOM.iloc[:,1]
+    colSoLuong =df_BOM.iloc[:,2]
+    colTenHang =df_BOM.iloc[:,3]
+    colHs =df_BOM.iloc[:,4]
+    colDv =df_BOM.iloc[:,5]
+    dfReport = pd.read_excel('temp.xlsx',sheet_name='rp')
+    lastRowRp = len(dfReport) + 1
+    dfReport.iloc[:,:] = np.nan    
+    print('Bắt Đầu Ghi Mã NPL, Tên Hàng , Định Mức Sản Phẩm...')
+    with pd.ExcelWriter('temp.xlsx' , engine='openpyxl', mode='a',if_sheet_exists='overlay') as writer:
+        dfReport.to_excel(writer, sheet_name='rp', index=False, startcol= 0,startrow=22, header=False) 
+        colNpl.to_excel(writer, sheet_name='rp', index=False, startcol= 1,startrow=22, header=False)  
+        colTenHang.to_excel(writer, sheet_name='rp', index=False, startcol= 2,startrow=22, header=False)    
+        colSoLuong.to_excel(writer, sheet_name='rp', index=False, startcol= 5,startrow=22, header=False) 
+        colHs.to_excel(writer, sheet_name='rp', index=False, startcol= 3,startrow=22, header=False) 
+        colDv.to_excel(writer, sheet_name='rp', index=False, startcol= 4,startrow=22, header=False)    

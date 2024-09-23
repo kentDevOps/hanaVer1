@@ -4,7 +4,12 @@ import time
 def mainPro():
     try:
         start_time = time.time()
-        tcTest()
+        #420012393
+        df_BOM = BOMprocess()
+        slSp = exportSlsp('450005951-03')
+        df_BOM['slNhuCau'] = df_BOM['Lượng NL, VT thực tế sử dụng để sản xuất một sản phẩm '] * slSp
+        print(df_BOM)
+        #exportBasicInfor('450005951-03',df_BOM)        
     # Kiểm Tra đã có các File Cần chưa
         '''count_Bom = countFileInFolder('BOM')
         count_Tc = countFileInFolder('tc')
@@ -22,10 +27,15 @@ def mainPro():
         elif count_dongThue == 0:
             print(f'File ĐÓNG THUẾ Không Tồn Tại , Hãy Copy Vào Folder dongThue')
             return
-    # xử lí file BOM , LẤY DỮ LIỆU
-        BOMprocess()
+    # xử lí file BOM , LẤY DỮ LIỆU'''
+        #df_BOM = BOMprocess()
+        '''for value in df_BOM['Mã sản phẩm']:
+            exportToReport(value)
+            exportSlsp(value)
+            exportBasicInfor(value,df_BOM)
+            '''
         end_time = time.time()
-        print(f'Thời gian thực thi: {end_time - start_time} giây')'''
+        print(f'Thời gian thực thi: {end_time - start_time} giây')
     except Exception as ex:
         logExp(str(ex))   
 
