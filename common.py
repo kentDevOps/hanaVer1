@@ -49,7 +49,7 @@ def BOMprocess():
     print('df_loc_mienThue:') 
     print(df_loc_mienThue)    
     # Đọc file Đóng thuế và TC để lấy ra cột tên nguyên liệu
-    '''df_loc_dongThue = dongThue_Tc_Process()
+    df_loc_dongThue = dongThue_Tc_Process()
     #lấy cột mã NPL từ df_None_kd
     ma_npl_df_kd = df_None_Kd.iloc[:,1].rename('npl')
     print('df_loc_mienThue:') 
@@ -68,7 +68,7 @@ def BOMprocess():
     print(df_dongThue_tenHang)
     df_BOM = pd.concat([df_dongThue_tenHang, df_mienThue_tenHang], axis=0)
     print(df_BOM)
-    return df_BOM'''
+    return df_BOM
 def exportToReport(maSp):
     df = pd.DataFrame({'maSP': [maSp]})
     with pd.ExcelWriter('temp.xlsx' , engine='openpyxl', mode='a',if_sheet_exists='overlay') as writer:
@@ -79,18 +79,27 @@ def mienThueProcess():
     #df_loc = df[['Mã NPL/SP','Tên hàng']]
     df_loc = df.iloc[2:,[39,41,40,46,42,36,43]]
     df_loc.columns = ['Mã NPL','tenHang','hs','dv','xuatXu','cif','donGia']
-    df_loc['donGia'] = df_loc['donGia'].astype(float)  # Chuyển đổi kiểu dữ liệu nếu cần
-    df_loc['donGia'] = df_loc.apply(cifProcess, axis=1)
+    '''df_loc['donGia'] = pd.to_numeric(df_loc['donGia'])
+    max_value = df_loc['donGia'].max()
+    df_loc['donGia'] = max_value'''
+    #df_loc['donGia'] = df_loc['donGia'].astype(float)  # Chuyển đổi kiểu dữ liệu nếu cần
+    #df_loc['donGia'] = df_loc.apply(cifProcess, axis=1)
     return df_loc
 def dongThue_Tc_Process():
     file_path_dongThue = getRelativeFile('dongThue','\*dongThue*.xlsx')
     file_path_Tc = getRelativeFile('tc','\*TC*.xlsx')
-    df_dongThue = pd.read_excel(file_path_dongThue[0]).iloc[2:,[3,45,44,50,46,40]]
-    df_dongThue.columns = ['Mã NPL','tenHang','hs','dv','xuatXu','cif']
+    df_dongThue = pd.read_excel(file_path_dongThue[0]).iloc[2:,[3,45,44,50,46,40,47]]
+    df_dongThue.columns = ['Mã NPL','tenHang','hs','dv','xuatXu','cif','donGia']
+    '''df_dongThue['donGia'] = pd.to_numeric(df_dongThue['donGia'])
+    max_value = df_dongThue['donGia'].max()
+    df_dongThue['donGia'] = max_value''' 
     print("dongThue File :")
     print(df_dongThue)
-    df_tc = pd.read_excel(file_path_Tc[0],sheet_name='TC').iloc[:,[8,10,9,11,22,13]]
-    df_tc.columns = ['Mã NPL','tenHang','hs','dv','xuatXu','cif']
+    df_tc = pd.read_excel(file_path_Tc[0],sheet_name='TC').iloc[:,[8,10,9,11,21,3,13]]
+    df_tc.columns = ['Mã NPL','tenHang','hs','dv','xuatXu','cif','donGia']
+    '''df_tc['donGia'] = pd.to_numeric(df_tc['donGia'])
+    max_value = df_tc['donGia'].max()
+    df_tc['donGia'] = max_value '''    
     print("Tc File :")
     print(df_tc)    
     df_merged = pd.concat([df_dongThue, df_tc], axis=0)

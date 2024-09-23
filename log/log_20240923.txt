@@ -8,3 +8,11 @@
 [20240923 21:28:57] '
 [20240923 21:31:23] read_excel() got an unexpected keyword argument 'encoding'
 [20240923 21:44:07] 'cif'
+[20240923 22:43:52] positional indexers are out-of-bounds
+[20240923 22:50:05] positional indexers are out-of-bounds
+[20240923 22:56:25] Length mismatch: Expected axis has 6 elements, new values have 7 elements
+[20240923 23:27:49] 'donGia'
+[20240923 23:32:49] '>=' not supported between instances of 'float' and 'str'
+[20240923 23:38:12] could not convert string to float: '31,646.84'
+[20240923 23:43:43] '>=' not supported between instances of 'float' and 'str'
+[20240923 23:57:03] Unable to parse string "31,646.84" at position 141

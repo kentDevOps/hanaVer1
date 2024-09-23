@@ -5,8 +5,11 @@ def mainPro():
     try:
         start_time = time.time()
         #420012393
-        #df_BOM = BOMprocess()
-        df_loc_mienThue = mienThueProcess()
+        df_BOM = BOMprocess()
+        '''df_BOM['donGia'] = df_BOM['donGia'].astype(float)  # Chuyển đổi kiểu dữ liệu nếu cần
+        df_BOM['donGia'] = df_BOM.apply(cifProcess, axis=1)
+        print('DFBOM after :')
+        print(df_BOM)'''
         '''slSp = exportSlsp('450005951-03')
         df_BOM['slNhuCau'] = df_BOM['Lượng NL, VT thực tế sử dụng để sản xuất một sản phẩm '] * slSp
         print(df_BOM)'''
