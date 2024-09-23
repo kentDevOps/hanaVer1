@@ -11,13 +11,31 @@ def getRelativeFile(folder_name,file_name):
     strFilePath = os.path.join(strCrrPath,folder_name) + file_name
     file_path = glob.glob(strFilePath)
     return file_path
+def cifProcess(row):
+    if row['cif'] == 'EXW':
+        return row['donGia'] * 1.02
+    elif row['cif'] == 'FCA':
+        return row['donGia'] * 1.005
+    elif row['cif'] == 'FOB':
+        return row['donGia'] * 1.005
+    elif row['cif'] == 'DAP':
+        return row['donGia'] * 0.99   
+    else:
+        return row['donGia'] 
+
 def BOMprocess():
     file_path = getRelativeFile('BOM','\*BOM*.xlsx')
     df = pd.read_excel(file_path[0])
     print('In Ra BOM nguyên bản...')
     print(df)
-    result = df.groupby(['Mã sản phẩm', 'Mã NPL'], as_index=False).agg({'Lượng NL, VT thực tế sử dụng để sản xuất một sản phẩm ': 'sum'})
+    result1 = df.groupby(['Mã sản phẩm', 'Mã NPL'], as_index=False).agg({'Lượng NL, VT thực tế sử dụng để sản xuất một sản phẩm ': 'sum'})
     print('In Ra BOM Sau Khi Gộp Theo Mã SP, Mã NL , Gộp Lượng Định Mức...')
+    print(result1)     
+    # Gộp thêm cột "NGÀY TỜ KHAI XUẤT KHẨU" vào result
+    result = result1.merge(df[['Mã sản phẩm', 'Mã NPL', 'NGÀY TỜ KHAI XUẤT KHẨU','Tỷ giá']].drop_duplicates(),
+                        on=['Mã sản phẩm', 'Mã NPL'],
+                        how='left')
+    print('In Ra BOM Sau Khi Thêm Ngày Xuất NPL...')
     print(result)   
     # Lọc mã NPL Có  KD (Đóng Thuế hoặc là TC)
     df_Kd = result[result['Mã NPL'].str.contains('KD', na=False)]
@@ -28,17 +46,15 @@ def BOMprocess():
     print(df_None_Kd)   
     # Đọc file miễn thuế để lấy ra cột tên nguyên liệu
     df_loc_mienThue = mienThueProcess()
+    print('df_loc_mienThue:') 
+    print(df_loc_mienThue)    
     # Đọc file Đóng thuế và TC để lấy ra cột tên nguyên liệu
-    df_loc_dongThue = dongThue_Tc_Process()
+    '''df_loc_dongThue = dongThue_Tc_Process()
     #lấy cột mã NPL từ df_None_kd
     ma_npl_df_kd = df_None_Kd.iloc[:,1].rename('npl')
     print('df_loc_mienThue:') 
     print(df_loc_mienThue)
     #lọc lấy tên hàng theo ma_npl_df_kd từ df_loc_mienThue
-    '''filtered_df2 = df_loc_mienThue[df_loc_mienThue['Mã NPL'].isin(df_None_Kd['Mã NPL'])]
-    print('filtered_df2:') 
-    print(filtered_df2)
-    df_mienThue_tenHang = pd.merge(df_None_Kd,filtered_df2[['Mã NPL', 'tenHang']],on='Mã NPL',how='left')'''
     df_loc_mienThue = df_loc_mienThue.drop_duplicates(subset=['Mã NPL'])
     df_mienThue_tenHang = pd.merge(df_None_Kd,df_loc_mienThue,on='Mã NPL',how='left')
     print('Lấy Ra Được frame chứa Tên Hàng Theo Các Mã Được Miễn Thuế:')
@@ -52,24 +68,7 @@ def BOMprocess():
     print(df_dongThue_tenHang)
     df_BOM = pd.concat([df_dongThue_tenHang, df_mienThue_tenHang], axis=0)
     print(df_BOM)
-    '''colNpl =df_BOM.iloc[:,1]
-    colSoLuong =df_BOM.iloc[:,2]
-    colTenHang =df_BOM.iloc[:,3]
-    colHs =df_BOM.iloc[:,4]
-    colDv =df_BOM.iloc[:,5]
-    dfReport = pd.read_excel('temp.xlsx',sheet_name='rp')
-    lastRowRp = len(dfReport) + 1
-    dfReport.iloc[:,:] = np.nan    
-    print('Bắt Đầu Ghi Mã NPL, Tên Hàng , Định Mức Sản Phẩm...')
-    with pd.ExcelWriter('temp.xlsx' , engine='openpyxl', mode='a',if_sheet_exists='overlay') as writer:
-        dfReport.to_excel(writer, sheet_name='rp', index=False, startcol= 0,startrow=22, header=False) 
-        colNpl.to_excel(writer, sheet_name='rp', index=False, startcol= 1,startrow=22, header=False)  
-        colTenHang.to_excel(writer, sheet_name='rp', index=False, startcol= 2,startrow=22, header=False)    
-        colSoLuong.to_excel(writer, sheet_name='rp', index=False, startcol= 5,startrow=22, header=False) 
-        colHs.to_excel(writer, sheet_name='rp', index=False, startcol= 3,startrow=22, header=False) 
-        colDv.to_excel(writer, sheet_name='rp', index=False, startcol= 4,startrow=22, header=False)
-    print('Quá Trình Ghi Mã NPL, Tên Hàng , Định Mức Sản Phẩm Kết Thúc!!!') '''  
-    return df_BOM
+    return df_BOM'''
 def exportToReport(maSp):
     df = pd.DataFrame({'maSP': [maSp]})
     with pd.ExcelWriter('temp.xlsx' , engine='openpyxl', mode='a',if_sheet_exists='overlay') as writer:
@@ -78,18 +77,20 @@ def mienThueProcess():
     file_path = getRelativeFile('mienThue','\*mienThue*.xlsx')
     df = pd.read_excel(file_path[0]) 
     #df_loc = df[['Mã NPL/SP','Tên hàng']]
-    df_loc = df.iloc[2:,[39,41,40,46]]
-    df_loc.columns = ['Mã NPL','tenHang','hs','dv']
+    df_loc = df.iloc[2:,[39,41,40,46,42,36,43]]
+    df_loc.columns = ['Mã NPL','tenHang','hs','dv','xuatXu','cif','donGia']
+    df_loc['donGia'] = df_loc['donGia'].astype(float)  # Chuyển đổi kiểu dữ liệu nếu cần
+    df_loc['donGia'] = df_loc.apply(cifProcess, axis=1)
     return df_loc
 def dongThue_Tc_Process():
     file_path_dongThue = getRelativeFile('dongThue','\*dongThue*.xlsx')
     file_path_Tc = getRelativeFile('tc','\*TC*.xlsx')
-    df_dongThue = pd.read_excel(file_path_dongThue[0]).iloc[2:,[3,45,44,50]]
-    df_dongThue.columns = ['Mã NPL','tenHang','hs','dv']
+    df_dongThue = pd.read_excel(file_path_dongThue[0]).iloc[2:,[3,45,44,50,46,40]]
+    df_dongThue.columns = ['Mã NPL','tenHang','hs','dv','xuatXu','cif']
     print("dongThue File :")
     print(df_dongThue)
-    df_tc = pd.read_excel(file_path_Tc[0],sheet_name='TC').iloc[:,[8,10,9,11]]
-    df_tc.columns = ['Mã NPL','tenHang','hs','dv']
+    df_tc = pd.read_excel(file_path_Tc[0],sheet_name='TC').iloc[:,[8,10,9,11,22,13]]
+    df_tc.columns = ['Mã NPL','tenHang','hs','dv','xuatXu','cif']
     print("Tc File :")
     print(df_tc)    
     df_merged = pd.concat([df_dongThue, df_tc], axis=0)

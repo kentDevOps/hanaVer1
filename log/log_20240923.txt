@@ -4,3 +4,7 @@
 [20240923 16:26:56] Excel file format cannot be determined, you must specify an engine manually.
 [20240923 16:28:48] Excel file format cannot be determined, you must specify an engine manually.
 [20240923 17:02:46] 'slsp'
+[20240923 21:24:39] '
+[20240923 21:28:57] '
+[20240923 21:31:23] read_excel() got an unexpected keyword argument 'encoding'
+[20240923 21:44:07] 'cif'

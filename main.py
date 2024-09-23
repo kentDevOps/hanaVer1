@@ -5,10 +5,11 @@ def mainPro():
     try:
         start_time = time.time()
         #420012393
-        df_BOM = BOMprocess()
-        slSp = exportSlsp('450005951-03')
+        #df_BOM = BOMprocess()
+        df_loc_mienThue = mienThueProcess()
+        '''slSp = exportSlsp('450005951-03')
         df_BOM['slNhuCau'] = df_BOM['Lượng NL, VT thực tế sử dụng để sản xuất một sản phẩm '] * slSp
-        print(df_BOM)
+        print(df_BOM)'''
         #exportBasicInfor('450005951-03',df_BOM)        
     # Kiểm Tra đã có các File Cần chưa
         '''count_Bom = countFileInFolder('BOM')
