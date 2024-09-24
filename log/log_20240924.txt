@@ -1,0 +1,14 @@
+
+[20240924 08:52:17] 'Mã s
+[20240924 08:57:28] index 0 is out of bounds for axis 0 with size 0
+[20240924 08:59:49] "Column(s) ['L
+[20240924 09:01:26] "Column(s) ['16/11/2023', 'Unnamed: 1', 'Unnamed: 2', 'Unnamed: 3', 'Unnamed: 4', 'v'] do not exist"
+[20240924 09:08:20] cannot insert Mã NPL, already exists
+[20240924 09:25:20] 'Mã NPL'
+[20240924 09:28:14] 'Mã NPL'
+[20240924 09:29:50] 'npl'
+[20240924 09:51:29] No axis named cif for object type DataFrame
+[20240924 10:10:34] agg function failed [how->max,dtype->object]
+[20240924 10:28:24] agg function failed [how->max,dtype->object]
+[20240924 10:32:05] cannot access local variable 'df_tc' where it is not associated with a value
+[20240924 11:01:07] cannot access local variable 'df_tc' where it is not associated with a value

@@ -13,15 +13,15 @@ def getRelativeFile(folder_name,file_name):
     return file_path
 def cifProcess(row):
     if row['cif'] == 'EXW':
-        return row['donGia'] * 1.02
+        return row['donGia_max'] * 1.02
     elif row['cif'] == 'FCA':
-        return row['donGia'] * 1.005
+        return row['donGia_max'] * 1.005
     elif row['cif'] == 'FOB':
-        return row['donGia'] * 1.005
+        return row['donGia_max'] * 1.005
     elif row['cif'] == 'DAP':
-        return row['donGia'] * 0.99   
+        return row['donGia_max'] * 0.99   
     else:
-        return row['donGia'] 
+        return row['donGia_max'] 
 
 def BOMprocess():
     file_path = getRelativeFile('BOM','\*BOM*.xlsx')
@@ -39,9 +39,11 @@ def BOMprocess():
     print(result)   
     # Lọc mã NPL Có  KD (Đóng Thuế hoặc là TC)
     df_Kd = result[result['Mã NPL'].str.contains('KD', na=False)]
+    df_Kd.rename(columns={df_Kd.columns[1]: 'npl'}, inplace=True)
     print(df_Kd)
     # Lọc mã NPL không KD (Miễn Thuế)
     df_None_Kd = result[~result['Mã NPL'].str.contains('KD', na=False)]
+    df_None_Kd.rename(columns={df_None_Kd.columns[1]: 'npl'}, inplace=True)
     print('df_None_Kd:')  
     print(df_None_Kd)   
     # Đọc file miễn thuế để lấy ra cột tên nguyên liệu
@@ -52,23 +54,26 @@ def BOMprocess():
     df_loc_dongThue = dongThue_Tc_Process()
     #lấy cột mã NPL từ df_None_kd
     ma_npl_df_kd = df_None_Kd.iloc[:,1].rename('npl')
-    print('df_loc_mienThue:') 
-    print(df_loc_mienThue)
+    print('df_loc_Dong Thue:') 
+    print(df_loc_dongThue)
     #lọc lấy tên hàng theo ma_npl_df_kd từ df_loc_mienThue
-    df_loc_mienThue = df_loc_mienThue.drop_duplicates(subset=['Mã NPL'])
-    df_mienThue_tenHang = pd.merge(df_None_Kd,df_loc_mienThue,on='Mã NPL',how='left')
+    #df_loc_mienThue = df_loc_mienThue.drop_duplicates(subset=['npl']) 
+    df_mienThue_tenHang = pd.merge(df_None_Kd,df_loc_mienThue,on='npl',how='left')
+    df_mienThue_tenHang = df_mienThue_tenHang.drop_duplicates(subset=['Mã sản phẩm', 'npl'])
     print('Lấy Ra Được frame chứa Tên Hàng Theo Các Mã Được Miễn Thuế:')
     print(df_mienThue_tenHang)
     #lọc lấy tên hàng theo ma_npl_df_kd từ df_loc_dongThue
     #lấy cột mã NPL từ df_kd
     ma_npl_df_kd_CoThue = df_Kd.iloc[:,1].rename('npl')
-    df_loc_dongThue = df_loc_dongThue.drop_duplicates(subset=['Mã NPL'])
-    df_dongThue_tenHang = pd.merge(df_Kd,df_loc_dongThue,on='Mã NPL',how='left')    
+    df_loc_dongThue = df_loc_dongThue.drop_duplicates(subset=['npl'])
+    df_dongThue_tenHang = pd.merge(df_Kd,df_loc_dongThue,on='npl',how='left')  
+    df_dongThue_tenHang = df_dongThue_tenHang.drop_duplicates(subset=['Mã sản phẩm', 'npl'])  
     print('Lọc Tên Hàng Theo Các Mã Phải Đóng Thuế:') 
     print(df_dongThue_tenHang)
     df_BOM = pd.concat([df_dongThue_tenHang, df_mienThue_tenHang], axis=0)
     print(df_BOM)
-    return df_BOM
+    df_STK = pd.concat([df_loc_mienThue, df_loc_dongThue], axis=0)
+    return df_BOM,df_STK
 def exportToReport(maSp):
     df = pd.DataFrame({'maSP': [maSp]})
     with pd.ExcelWriter('temp.xlsx' , engine='openpyxl', mode='a',if_sheet_exists='overlay') as writer:
@@ -77,26 +82,45 @@ def mienThueProcess():
     file_path = getRelativeFile('mienThue','\*mienThue*.xlsx')
     df = pd.read_excel(file_path[0]) 
     #df_loc = df[['Mã NPL/SP','Tên hàng']]
-    df_loc = df.iloc[2:,[39,41,40,46,42,36,43]]
-    df_loc.columns = ['Mã NPL','tenHang','hs','dv','xuatXu','cif','donGia']
+    df_loc = df.iloc[2:,[39,41,40,46,42,36,43,20,21,47]]
+    df_loc.columns = ['npl','tenHang','hs','dv','xuatXu','cif','donGia','stk','ntk','tongSl']
     '''df_loc['donGia'] = pd.to_numeric(df_loc['donGia'])
     max_value = df_loc['donGia'].max()
     df_loc['donGia'] = max_value'''
     #df_loc['donGia'] = df_loc['donGia'].astype(float)  # Chuyển đổi kiểu dữ liệu nếu cần
     #df_loc['donGia'] = df_loc.apply(cifProcess, axis=1)
+    print(df_loc)
+    df_loc['donGia_max'] = df_loc.groupby(['npl','cif'])['donGia'].transform('max')
+    '''df_grouped = df_loc.groupby('Mã NPL').agg({
+        'tenHang': 'first',  # Giữ lại giá trị đầu tiên của cột 'Mã NPL' hoặc có thể thay đổi tùy theo nhu cầu
+        'hs': 'first',  # Tổng số lượng theo mã sản phẩm
+        'dv': 'first',  # Giữ lại giá trị đầu tiên (hoặc sử dụng hàm phù hợp khác)
+        'xuatXu': 'first',  # Giữ lại giá trị đầu tiên của đơn vị
+        'cif': 'first',
+        'donGia': 'max'  # Giữ lại giá trị đầu tiên của cột cif (nếu cần)
+    }).reset_index()'''  
     return df_loc
 def dongThue_Tc_Process():
     file_path_dongThue = getRelativeFile('dongThue','\*dongThue*.xlsx')
     file_path_Tc = getRelativeFile('tc','\*TC*.xlsx')
-    df_dongThue = pd.read_excel(file_path_dongThue[0]).iloc[2:,[3,45,44,50,46,40,47]]
-    df_dongThue.columns = ['Mã NPL','tenHang','hs','dv','xuatXu','cif','donGia']
+    df_dongThue = pd.read_excel(file_path_dongThue[0]).iloc[2:,[3,45,44,50,46,40,47,24,25,49]]
+    df_dongThue.columns = ['npl','tenHang','hs','dv','xuatXu','cif','donGia','stk','ntk','tongSl']
+    #chuyển đổi giá trị thành số và định dạng số thập phân
+    df_dongThue['donGia'] = pd.to_numeric(df_dongThue['donGia'], errors='coerce')
+    df_dongThue['donGia'] = df_dongThue['donGia'].round(6)  # Giữ tối đa 6 chữ số sau dấu phẩy    
+    df_dongThue['donGia_max'] = df_dongThue.groupby(['npl','cif'])['donGia'].transform('max')
     '''df_dongThue['donGia'] = pd.to_numeric(df_dongThue['donGia'])
     max_value = df_dongThue['donGia'].max()
     df_dongThue['donGia'] = max_value''' 
     print("dongThue File :")
     print(df_dongThue)
-    df_tc = pd.read_excel(file_path_Tc[0],sheet_name='TC').iloc[:,[8,10,9,11,21,3,13]]
-    df_tc.columns = ['Mã NPL','tenHang','hs','dv','xuatXu','cif','donGia']
+    df_tc = pd.read_excel(file_path_Tc[0],sheet_name='TC').iloc[:,[8,10,9,11,21,21,13,3,4,12]]
+    df_tc.columns = ['npl','tenHang','hs','dv','xuatXu','cif','donGia','stk','ntk','tongSl']
+    #chuyển đổi giá trị thành số và định dạng số thập phân
+    df_tc['donGia'] = pd.to_numeric(df_tc['donGia'], errors='coerce')
+    df_tc['donGia'] = df_tc['donGia'].round(6)  # Giữ tối đa 6 chữ số sau dấu phẩy
+
+    df_tc['donGia_max'] = df_tc.groupby(['npl','cif'])['donGia'].transform('max')
     '''df_tc['donGia'] = pd.to_numeric(df_tc['donGia'])
     max_value = df_tc['donGia'].max()
     df_tc['donGia'] = max_value '''    
