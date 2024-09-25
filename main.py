@@ -3,15 +3,21 @@ from common import *
 from stk import *
 import time
 def mainPro():
-    #try:
+    try:
         start_time = time.time()
         #420012393
-        locTrung()
-        '''df_BOM,df_STK = BOMprocess()
+        #locTrung()
+        print('---------------------------------------------------------------------')
+        print('Bắt Đầu Xử Lí Data Từ BOM,tc,Miễn Thuế,Đóng THuế...')
+        print('Hãy Kiên Nhẫn Chờ Đợi, Data của bạn khá nặng...')
+        print('Quá Trình Xử Lí có thể mất 2 - 4 phút  ...')
+        df_BOM = BOMprocess()
         #df_filtered = df_BOM[df_BOM['npl'] == '140400350']
         print('DFBOM Origin :')
         print(df_BOM)
-        df_BOM['donGia_max'] = df_BOM['donGia_max'].astype(float)  # Chuyển đổi kiểu dữ liệu nếu cần
+        exportData(df_BOM)
+        print('Kết Thúc Copy Data Đã Xử Lí!!!')
+        '''df_BOM['donGia_max'] = df_BOM['donGia_max'].astype(float)  # Chuyển đổi kiểu dữ liệu nếu cần
         df_BOM['donGia_max'] = df_BOM.apply(cifProcess, axis=1)
         print('DFBOM after :')
         print(df_BOM)
@@ -56,8 +62,8 @@ def mainPro():
             copyReport(value)'''
         end_time = time.time()
         print(f'Thời gian thực thi: {end_time - start_time} giây')
-    #except Exception as ex:
-    #   logExp(str(ex))   
+    except Exception as ex:
+       logExp(str(ex))   
 
 #check xem có phải Hàm main không và show form
 if __name__ == "__main__":
