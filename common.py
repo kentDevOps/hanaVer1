@@ -26,49 +26,49 @@ def cifProcess(row):
 def BOMprocess():
     file_path = getRelativeFile('BOM','\*BOM*.xlsx')
     df = pd.read_excel(file_path[0])
-    print('---------------------------------------------------------------------')
+    print('------------------------------------------------------------------------------------------------------------------------------------------')
     print('In Ra BOM nguyên bản...')
     print(df)
     result1 = df.groupby(['Mã sản phẩm', 'Mã NPL'], as_index=False).agg({'Lượng NL, VT thực tế sử dụng để sản xuất một sản phẩm ': 'sum'})
-    print('---------------------------------------------------------------------')
+    print('------------------------------------------------------------------------------------------------------------------------------------------')
     print('In Ra BOM Sau Khi Gộp Theo Mã SP, Mã NL , Gộp Lượng Định Mức...')
     print(result1)     
     # Gộp thêm cột "NGÀY TỜ KHAI XUẤT KHẨU" vào result
-    result = result1.merge(df[['Mã sản phẩm', 'Mã NPL', 'NGÀY TỜ KHAI XUẤT KHẨU','Tỷ giá']].drop_duplicates(),
+    result = result1.merge(df[['Mã sản phẩm', 'Mã NPL', 'NGÀY TỜ KHAI XUẤT KHẨU','Tỷ giá','Số lượng sản phẩm']].drop_duplicates(),#Tỷ giá
                         on=['Mã sản phẩm', 'Mã NPL'],
                         how='left')
-    print('---------------------------------------------------------------------')
+    print('------------------------------------------------------------------------------------------------------------------------------------------')
     print('In Ra BOM Sau Khi Thêm Ngày Xuất NPL...')
     print(result)   
     # Lọc mã NPL Có  KD (Đóng Thuế hoặc là TC)
     df_Kd = result[result['Mã NPL'].str.contains('KD', na=False)]
     df_Kd.rename(columns={df_Kd.columns[1]: 'npl'}, inplace=True)
-    print('---------------------------------------------------------------------')
+    print('------------------------------------------------------------------------------------------------------------------------------------------')
     print('df_Kd:') 
     print(df_Kd)
     # Lọc mã NPL không KD (Miễn Thuế)
     df_None_Kd = result[~result['Mã NPL'].str.contains('KD', na=False)]
     df_None_Kd.rename(columns={df_None_Kd.columns[1]: 'npl'}, inplace=True)
-    print('---------------------------------------------------------------------')
+    print('------------------------------------------------------------------------------------------------------------------------------------------')
     print('df_None_Kd:')  
     print(df_None_Kd)   
     # Đọc file miễn thuế để lấy ra cột tên nguyên liệu
     df_loc_mienThue = mienThueProcess()
-    print('---------------------------------------------------------------------')
+    print('------------------------------------------------------------------------------------------------------------------------------------------')
     print('df_loc_mienThue:') 
     print(df_loc_mienThue)    
     # Đọc file Đóng thuế và TC để lấy ra cột tên nguyên liệu
     df_loc_dongThue = dongThue_Tc_Process()
     #lấy cột mã NPL từ df_None_kd
     ma_npl_df_kd = df_None_Kd.iloc[:,1].rename('npl')
-    print('---------------------------------------------------------------------')
+    print('------------------------------------------------------------------------------------------------------------------------------------------')
     print('df_loc_Dong Thue:') 
     print(df_loc_dongThue)
     #lọc lấy tên hàng theo ma_npl_df_kd từ df_loc_mienThue
     #df_loc_mienThue = df_loc_mienThue.drop_duplicates(subset=['npl']) 
     df_mienThue_tenHang = pd.merge(df_None_Kd,df_loc_mienThue,on='npl',how='left')
     df_mienThue_tenHang = df_mienThue_tenHang.drop_duplicates(subset=['Mã sản phẩm', 'npl'])
-    print('---------------------------------------------------------------------')
+    print('------------------------------------------------------------------------------------------------------------------------------------------')
     print('Lấy Ra Được frame chứa Tên Hàng Theo Các Mã Được Miễn Thuế:')
     print(df_mienThue_tenHang)
     #lọc lấy tên hàng theo ma_npl_df_kd từ df_loc_dongThue
@@ -77,11 +77,11 @@ def BOMprocess():
     df_loc_dongThue = df_loc_dongThue.drop_duplicates(subset=['npl'])
     df_dongThue_tenHang = pd.merge(df_Kd,df_loc_dongThue,on='npl',how='left')  
     df_dongThue_tenHang = df_dongThue_tenHang.drop_duplicates(subset=['Mã sản phẩm', 'npl'])  
-    print('---------------------------------------------------------------------')
+    print('------------------------------------------------------------------------------------------------------------------------------------------')
     print('Lọc Tên Hàng Theo Các Mã Phải Đóng Thuế:') 
     print(df_dongThue_tenHang)
     df_BOM = pd.concat([df_dongThue_tenHang, df_mienThue_tenHang], axis=0)
-    print('---------------------------------------------------------------------')
+    print('------------------------------------------------------------------------------------------------------------------------------------------')
     print(df_BOM)
     #df_STK = pd.concat([df_loc_mienThue, df_loc_dongThue], axis=0)
     return df_BOM
@@ -100,7 +100,7 @@ def mienThueProcess():
     df_loc['donGia'] = max_value'''
     #df_loc['donGia'] = df_loc['donGia'].astype(float)  # Chuyển đổi kiểu dữ liệu nếu cần
     #df_loc['donGia'] = df_loc.apply(cifProcess, axis=1)
-    print('---------------------------------------------------------------------')
+    print('------------------------------------------------------------------------------------------------------------------------------------------')
     print(df_loc)
     df_loc['donGia_max'] = df_loc.groupby(['npl','cif'])['donGia'].transform('max')
     '''df_grouped = df_loc.groupby('Mã NPL').agg({
@@ -124,7 +124,7 @@ def dongThue_Tc_Process():
     '''df_dongThue['donGia'] = pd.to_numeric(df_dongThue['donGia'])
     max_value = df_dongThue['donGia'].max()
     df_dongThue['donGia'] = max_value''' 
-    print('---------------------------------------------------------------------')
+    print('------------------------------------------------------------------------------------------------------------------------------------------')
     print("dongThue File :")
     print(df_dongThue)
     df_tc = pd.read_excel(file_path_Tc[0],sheet_name='TC').iloc[:,[8,10,9,11,21,21,13,3,4,12]]
@@ -137,11 +137,11 @@ def dongThue_Tc_Process():
     '''df_tc['donGia'] = pd.to_numeric(df_tc['donGia'])
     max_value = df_tc['donGia'].max()
     df_tc['donGia'] = max_value '''
-    print('---------------------------------------------------------------------')    
+    print('------------------------------------------------------------------------------------------------------------------------------------------')    
     print("Tc File :")
     print(df_tc)    
     df_merged = pd.concat([df_dongThue, df_tc], axis=0)
-    print('---------------------------------------------------------------------')
+    print('------------------------------------------------------------------------------------------------------------------------------------------')
     print("Tong Hop File :")
     print(df_merged)    
     return df_merged
@@ -152,7 +152,7 @@ def tcTest():
     #df_tc = pd.read_excel(file_path_Tc[0])#.iloc[2:,[8,10]]
    # df_tc = df_tc.iloc[:,3]
     df_filtered = df_tc.drop_duplicates(subset=['Mã sản phẩm', 'Số lượng sản phẩm'], keep='first')
-    print('---------------------------------------------------------------------')
+    print('------------------------------------------------------------------------------------------------------------------------------------------')
     print(df_filtered) 
     #print(unique_values) 
     #print(str(len(unique_values)))
