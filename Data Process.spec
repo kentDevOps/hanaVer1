@@ -10,7 +10,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=['matplotlib', 'scipy', 'PySide6'],
+    excludes=['matplotlib', 'PySide6'],
     noarchive=False,
 )
 pyz = PYZ(a.pure)
